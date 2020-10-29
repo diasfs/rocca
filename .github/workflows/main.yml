@@ -15,6 +15,9 @@ jobs:
         version: 12
 
     - name: yarn install, yarn build, yarn start
+      env: 
+        VISTA_ENDPOINT: ${{ secrets.VISTA_ENDPOINT }}
+        VISTA_KEY: ${{ secrets.VISTA_KEY }}
       run: |
         yarn install
         yarn build
