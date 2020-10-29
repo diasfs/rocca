@@ -1,6 +1,10 @@
-on: 
+on:
   schedule:
-    - cron: '*/30 * * * *'
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '*/15 * * * *'
+  push:
+    branches:
+      - main
 name: Publish Website
 jobs:
   FTP-Deploy-Action:
@@ -32,3 +36,4 @@ jobs:
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./data/
+        git-ftp-args: --all
