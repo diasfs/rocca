@@ -467,6 +467,9 @@ imoveis.listarcampos().then(async campos => {
 getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos}) => {
 
     const filename = path.join(data_folder, 'imoveis.json');
+    if (!fs.existsSync(data_folder)) {
+        await fs.promises.mkdir(data_folder, { recursive: true });
+    }
     
         console.log('writing imoveis.json');
         await fs.promises.writeFile(filename, JSON.stringify(imoveis));
