@@ -1,6 +1,6 @@
 on: 
-    schedule:
-        - cron: '*/30 * * * *'
+  schedule:
+    - cron: '*/30 * * * *'
 name: Publish Website
 jobs:
   FTP-Deploy-Action:
