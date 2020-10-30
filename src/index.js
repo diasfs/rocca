@@ -2,10 +2,12 @@ import { imoveis } from './api';
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
+import slugify from 'slugify';
 
 const root_folder = path.dirname(__dirname);
 const data_folder = path.join(root_folder, 'data');
 
+const log = msg => process.stdout.write(`${msg}\r`);
 
 const getImoveis = async () => {
     let lastCodigo = 0;
@@ -381,14 +383,14 @@ const getImoveis = async () => {
         lastCodigo = Math.max(lastCodigo, ...codigos);
         Imoveis = [...Imoveis, ...rows];
 
-        console.log(`Loading page ${pagina}`);
+        log(`Loading page ${pagina}`);
     } while (count == 50);
 
     count = Imoveis.length;
     pagina = 0;
     for (let imovel of Imoveis) {
         pagina++;
-        console.log(`loading row ${pagina} of ${count}`);
+        log(`loading row ${pagina} of ${count}`);
         let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura } = await imoveis.detalhes({
             fields: [
                 "Caracteristicas",
@@ -522,6 +524,31 @@ getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: 
         let super_destaques = imoveis.filter(imovel => imovel.SuperDestaqueWeb.toLowerCase() == 'sim');
         let super_destaques_csv = Papa.unparse(super_destaques);
         await fs.promises.writeFile(path.join(data_folder, 'super_destaques.csv'), super_destaques_csv);
+
+
+        console.log('writing bairros.csv');
+        let bairros = imoveis.map(({ UF, Cidade, Bairro }) => ({ UF, Cidade, Bairro, slug: slugify(`${Bairro} ${Cidade} ${UF}`, { lower: true, locale: 'pt'}), cidade_slug: slugify(`${Cidade} ${UF}`, { lower: true, locale: 'pt'}) }));
+        let bairros_comerciais = imoveis.map(({ UF, Cidade, BairroComercial: Bairro }) => ({ UF, Cidade, Bairro, slug: slugify(`${Bairro} ${Cidade} ${UF}`, { lower: true, locale: 'pt'}), cidade_slug: slugify(`${Cidade} ${UF}`, { lower: true, locale: 'pt'})  }));
+        bairros = [...bairros, ...bairros_comerciais];
+        let slugs_bairros = [...new Set(bairros.map(({ slug }) => slug))];
+        bairros = slugs_bairros.map(slug => bairros.find(bairro => bairro.slug == slug ));
+        let bairros_csv = Papa.unparse(bairros);
+        await fs.promises.writeFile(path.join(data_folder, 'bairros.csv'), bairros_csv);
+
+        console.log('writing cidades.csv');
+        let cidades = imoveis.map(({ UF, Cidade }) => ({ UF, Cidade, slug: slugify(`${Cidade} ${UF}`, { lower: true, locale: 'pt'}) }));
+        let slugs_cidades = [...new Set(cidades.map(({ slug }) => slug))];
+        cidades = slugs_cidades.map(slug => cidades.find(cidade => cidade.slug == slug ));
+        let cidades_csv = Papa.unparse(cidades);
+        await fs.promises.writeFile(path.join(data_folder, 'cidades.csv'), cidades_csv);
+
+        console.log('writing categorias.csv');
+        let categorias = imoveis.map(({ Categoria }) => ({ Categoria, slug: slugify(`${Categoria}`, { lower: true, locale: 'pt'}) }));
+        let slugs_categorias = [...new Set(categorias.map(({ slug }) => slug))];
+        categorias = slugs_categorias.map(slug => categorias.find(categoria => categoria.slug == slug ));
+        let categorias_csv = Papa.unparse(categorias);
+        await fs.promises.writeFile(path.join(data_folder, 'categorias.csv'), categorias_csv);
+
 
     
 })
