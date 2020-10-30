@@ -14,8 +14,12 @@ const getImoveis = async () => {
     let FotosEmpreendimento = [];
     let Anexos = [];
     let Videos = [];
+    let CaracteristicasImovel = [];
+    let InfraEstruturaImovel = [];
+    
     let count = 0;
     let pagina = 0;
+    
     do {
         pagina++;
         let rows = await imoveis.listar({
@@ -377,13 +381,18 @@ const getImoveis = async () => {
         lastCodigo = Math.max(lastCodigo, ...codigos);
         Imoveis = [...Imoveis, ...rows];
 
-        console.log({ pagina });
+        console.log(`Loading page ${pagina}`);
     } while (count == 50);
 
+    count = Imoveis.length;
+    page = 0;
     for (let imovel of Imoveis) {
-        
-        let { Foto, FotoEmpreendimento, Video, Anexo } = await imoveis.detalhes({
+        page++;
+        console.log(`loading row ${page} of ${count}`);
+        let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura } = await imoveis.detalhes({
             fields: [
+                "Caracteristicas",
+                "InfraEstrutura",
                 {
                     "Foto": [
                         "Ordem",
@@ -450,9 +459,11 @@ const getImoveis = async () => {
         FotosEmpreendimento = [...FotosEmpreendimento, ...Object.values(FotoEmpreendimento)];
         Anexos = [...Anexos, ...Object.values(Anexo)];
         Videos = [...Videos, ...Object.values(Video)];
+        CaracteristicasImovel = [...CaracteristicasImovel, {Codigo: imovel.Codigo, ...Caracteristicas}];
+        InfraEstruturaImovel = [...InfraEstruturaImovel, {Codigo: imovel.Codigo, ...InfraEstrutura}];
     }
 
-    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos};
+    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel};
 };
 
 /*
@@ -464,7 +475,7 @@ imoveis.listarcampos().then(async campos => {
 
 
 
-getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos}) => {
+getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel}) => {
 
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
@@ -493,6 +504,25 @@ getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: 
         console.log('writing videos.csv');
         let videos_csv = Papa.unparse(videos);
         await fs.promises.writeFile(path.join(data_folder,'videos.csv'), videos_csv);
+        
+        console.log('writing caracteristicas_imovel.csv');
+        let caracteristicas_imovel_csv = Papa.unparse(caracteristicas_imovel);
+        await fs.promises.writeFile(path.join(data_folder,'caracteristicas_imovel.csv'), caracteristicas_imovel_csv);
+        
+        console.log('writing infra_estrutura_imovel.csv');
+        let infra_estrutura_imovel_csv = Papa.unparse(infra_estrutura_imovel);
+        await fs.promises.writeFile(path.join(data_folder,'infra_estrutura_imovel.csv'), infra_estrutura_imovel_csv);
+
+        console.log('writing destaques.csv');
+        let destaques = imoveis.filter(imovel => imovel.DestaqueWeb.toLowerCase() == 'sim');
+        let destaques_csv = Papa.unparse(destaques);
+        await fs.promises.writeFile(path.join(data_folder, 'destaques.csv'), destaques_csv);
+
+        console.log('writing super_destaques.csv');
+        let super_destaques = imoveis.filter(imovel => imovel.SuperDestaqueWeb.toLowerCase() == 'sim');
+        let super_destaques_csv = Papa.unparse(super_destaques);
+        await fs.promises.writeFile(path.join(data_folder, 'super_destaques.csv'), super_destaques_csv);
+
     
 })
 
