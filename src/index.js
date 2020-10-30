@@ -385,10 +385,10 @@ const getImoveis = async () => {
     } while (count == 50);
 
     count = Imoveis.length;
-    page = 0;
+    pagina = 0;
     for (let imovel of Imoveis) {
-        page++;
-        console.log(`loading row ${page} of ${count}`);
+        pagina++;
+        console.log(`loading row ${pagina} of ${count}`);
         let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura } = await imoveis.detalhes({
             fields: [
                 "Caracteristicas",
