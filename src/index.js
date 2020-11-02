@@ -3,11 +3,20 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import slugify from 'slugify';
+import FormData from 'form-data';
+import axios from 'axios';
 
 const root_folder = path.dirname(__dirname);
 const data_folder = path.join(root_folder, 'data');
 
 const log = msg => process.stdout.write(`${msg}\r`);
+
+const api = axios.create({
+    baseURL: process.env.CMS_ENDPOINT,
+    params: {
+        key: process.env.CMS_KEY
+    }
+});
 
 const getImoveis = async () => {
     let lastCodigo = 0;
@@ -468,6 +477,23 @@ const getImoveis = async () => {
     return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel};
 };
 
+const uploadFiles = () => {
+    return fs.promises.readdir(data_folder)
+        .then(async files => {
+            for (let file of files) {
+                let data = new FormData();
+                data.append('file', fs.createReadStream(`${data_folder}/${file}`));
+                await api.post('upload', data, {
+                    headers: {
+                        ...data.getHeaders()
+                    }
+                })
+                    .then(() => console.log(`${file} uploaded`))
+                    .catch(() => console.error(`${file} not uploaded`));
+            }
+        });
+}
+
 /*
 imoveis.listarcampos().then(async campos => {
     const filename = path.join(data_folder, 'campos.json');
@@ -477,7 +503,9 @@ imoveis.listarcampos().then(async campos => {
 
 
 
-getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel}) => {
+
+getImoveis()
+    .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel}) => {
 
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
@@ -549,7 +577,9 @@ getImoveis().then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: 
         let categorias_csv = Papa.unparse(categorias);
         await fs.promises.writeFile(path.join(data_folder, 'categorias.csv'), categorias_csv);
 
-
+        console.log('uploading files');
+        await uploadFiles();
+        console.log('files uploaded');
     
 })
 
