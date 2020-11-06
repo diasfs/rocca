@@ -27,6 +27,8 @@ const getImoveis = async () => {
     let Videos = [];
     let CaracteristicasImovel = [];
     let InfraEstruturaImovel = [];
+    let Corretores = [];
+    let CorretoresImovel = [];
     
     let count = 0;
     let pagina = 0;
@@ -400,7 +402,7 @@ const getImoveis = async () => {
     for (let imovel of Imoveis) {
         pagina++;
         log(`loading row ${pagina} of ${count}`);
-        let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura } = await imoveis.detalhes({
+        let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura, Corretor } = await imoveis.detalhes({
             fields: [
                 "Caracteristicas",
                 "InfraEstrutura",
@@ -457,6 +459,7 @@ const getImoveis = async () => {
                         "Tipo"
                     ]
                 },
+                { "Corretor": ["Codigo", "Datacadastro", "RG_Inscricao", "RGEmissor", "CPF_CGC", "Nascimento", "Nacionalidade", "CNH", "CNHExpedicao", "CNHVencimento", "Celular", "Endereco", "Bairro", "Cidade", "UF", "CEP", "Pais", "Fone", "Fax", "Email", "Nome", "Observacoes", "Administrativo", "Agenciador", "Gerente", "Celular1", "Celular2", "Corretor", "Equipe", "Nomecompleto", "Ramal", "Sexo", "Exibirnosite", "Inativo", "CRECI", "Estadocivil", "Diretor", "MetadeCaptacoes", "MetaValordeVendas", "EnderecoTipo", "EnderecoNumero", "EnderecoComplemento", "Bloco", "Chat", "CategoriaRanking", "AtuacaoVenda", "AtuacaoLocacao", "Foto", "Tipo", "CodigoAgencia", "CodigoEquipe"] }
             ],
             imovel: imovel.Codigo
         });
@@ -472,9 +475,14 @@ const getImoveis = async () => {
         Videos = [...Videos, ...Object.values(Video)];
         CaracteristicasImovel = [...CaracteristicasImovel, {Codigo: imovel.Codigo, ...Caracteristicas}];
         InfraEstruturaImovel = [...InfraEstruturaImovel, {Codigo: imovel.Codigo, ...InfraEstrutura}];
+        Corretores = [...Corretores, ...Object.values(Corretor)];
+        CorretoresImovel = [...CorretoresImovel, ...Object.values(Corretor).map(({ Codigo }) => ({ CodigoImovel: imovel.Codigo, Codigo }))];
+        
     }
+    
+    Corretores = [...new Set(Corretores.map(({ Codigo }) => Codigo))].map(codigo => Corretores.find(c => c.Codigo == codigo));
 
-    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel};
+    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel, Corretores, CorretoresImovel };
 };
 
 const uploadFiles = () => {
@@ -505,7 +513,7 @@ imoveis.listarcampos().then(async campos => {
 
 
 getImoveis()
-    .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel}) => {
+    .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel, Corretores: corretores, CorretoresImovel: corretores_imovel}) => {
 
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
@@ -576,6 +584,14 @@ getImoveis()
         categorias = slugs_categorias.map(slug => categorias.find(categoria => categoria.slug == slug ));
         let categorias_csv = Papa.unparse(categorias);
         await fs.promises.writeFile(path.join(data_folder, 'categorias.csv'), categorias_csv);
+
+        console.log('writing corretores.csv');
+        let corretores_csv = Papa.unparse(corretores);
+        await fs.promises.writeFile(path.join(data_folder, 'corretores.csv'), corretores_csv);
+
+        console.log('writing corretores_imovel.csv');
+        let corretores_imovel_csv = Papa.unparse(corretores_imovel);
+        await fs.promises.writeFile(path.join(data_folder, 'corretores_imovel.csv'), corretores_imovel_csv);
 
         console.log('uploading files');
         await uploadFiles();
