@@ -11,6 +11,7 @@ jobs:
     name: FTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
+      
     - uses: actions/checkout@v2.1.0
       with:
         fetch-depth: 2
@@ -19,6 +20,44 @@ jobs:
       uses: actions/setup-node@v1
       with:
         version: 12
+
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        java-package: jre
+
+    - name: install gdal lib
+      run: |
+        apt update  
+        apt install -y gdal-bin
+
+    - name: fetch osmosis
+      run: |
+        wget https://github.com/openstreetmap/osmosis/releases/download/0.48.3/osmosis-0.48.3.tgz -O osmosis.tgz
+        mkdir osmosis
+        mv osmosis.tgz osmosis
+        cd osmosis
+        tar xzvf osmosis.tgz
+        chmod a+x bin/osmosis
+        cd ..
+
+    - name: fetch osmconvert
+      run: |
+        wget http://m.m.i24.cc/osmconvert64 -O osmconvert
+        chmod a+x osmconvert
+
+    - name: download osm data
+      run: wget http://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf
+
+    - name: extract osm data
+      run: ./osmosis/bin/osmosis --read-pbf sul-latest.osm.pbf --tf accept-nodes aeroway=aerodrome amenity=atm,bank,bar,bus_station,cafe,car_wash,grave_yard,pharmacy,hospital,library,post_depot,nightclub,parking,police,post_office,school,childcare,university craft=bakery shop=beauty,books,convenience,chemist,pet,mall,supermarket landuse=cemetery building=church,stadium leisure=fitness_centre,sports_centre,park,stadium tourism=museum,attraction public_transport=station --tf reject-ways --tf reject-relations --write-xml sul.nodes.osm
+
+    - name: convert osm data
+      run: |
+        ./osmconvert sul.nodes.osm --drop-ways --drop-author --drop-relations --drop-versions > sul.poi.osm
+        ogr2ogr -f GeoJSON sul.poi.json sul.poi.osm points
+
+    
 
     - name: yarn install, yarn build, yarn start
       env: 

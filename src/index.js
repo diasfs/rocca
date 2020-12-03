@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import slugify from 'slugify';
 import FormData from 'form-data';
 import axios from 'axios';
+let geo = require('node-geo-distance');
 
 const root_folder = path.dirname(__dirname);
 const data_folder = path.join(root_folder, 'data');
@@ -18,6 +19,27 @@ const api = axios.create({
     }
 });
 
+const getPois = () => {
+    let pois = require(`${root_folder}/sul.poi.json`);
+    let data = pois.features.map(row => {
+        let id = row.properties.osm_id;
+        let name = row.properties.name;
+        let tags = row.properties.other_tags.replace(/\"/igm, '').replace(/\=\>/igm, ':');
+        let [lng, lat] = row.geometry.coordinates;
+        return {
+            id,
+            name,
+            tags,
+            lat,
+            lng
+        }
+    });
+
+    return data;
+};
+
+const pois = getPois();
+
 const getImoveis = async () => {
     let lastCodigo = 0;
     let Imoveis = [];
@@ -29,6 +51,7 @@ const getImoveis = async () => {
     let InfraEstruturaImovel = [];
     let Corretores = [];
     let CorretoresImovel = [];
+    let PoisImovel = [];
     
     let count = 0;
     let pagina = 0;
@@ -477,13 +500,33 @@ const getImoveis = async () => {
         InfraEstruturaImovel = [...InfraEstruturaImovel, {Codigo: imovel.Codigo, ...InfraEstrutura}];
         Corretores = [...Corretores, ...Object.values(Corretor)];
         CorretoresImovel = [...CorretoresImovel, ...Object.values(Corretor).map(({ Codigo }) => ({ CodigoImovel: imovel.Codigo, Codigo }))];
+
+        let Pois = pois.map(poi => {
+            let { lat, lng } = poi;
+            let distance = geo.haversineSync({
+                latitude: lat,
+                longitude: lng
+            }, {
+                latitude: +imovel.Latitude,
+                longitude: +imovel.Longitude
+            });
+            return {
+                distance,
+                ...poi
+            };
+        }).filter(({ distance }) => {
+            return distance < 2000;
+        }).map(poi => ({ CodigoImovel: imovel.Codigo, ...poi}));
+        PoisImovel = [...PoisImovel, ...Pois];
         
     }
     
     Corretores = [...new Set(Corretores.map(({ Codigo }) => Codigo))].map(codigo => Corretores.find(c => c.Codigo == codigo));
 
-    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel, Corretores, CorretoresImovel };
+    return {Imoveis, Fotos, FotosEmpreendimento, Anexos, Videos, CaracteristicasImovel, InfraEstruturaImovel, Corretores, CorretoresImovel, PoisImovel };
 };
+
+
 
 const uploadFiles = () => {
     return fs.promises.readdir(data_folder)
@@ -513,7 +556,7 @@ imoveis.listarcampos().then(async campos => {
 
 
 getImoveis()
-    .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel, Corretores: corretores, CorretoresImovel: corretores_imovel}) => {
+    .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel, Corretores: corretores, CorretoresImovel: corretores_imovel, PoisImovel: pois_imovel}) => {
 
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
@@ -591,7 +634,12 @@ getImoveis()
 
         console.log('writing corretores_imovel.csv');
         let corretores_imovel_csv = Papa.unparse(corretores_imovel);
-        await fs.promises.writeFile(path.join(data_folder, 'corretores_imovel.csv'), corretores_imovel_csv);
+        await fs.promises.writeFile(path.join(data_folder, 'corretores_imovel.csv'), corretores_imovel_csv);        
+
+        console.log('writing pois_imovel.csv');
+        let pois_imovel_csv = Papa.unparse(pois_imovel);
+        await fs.promises.writeFile(path.join(data_folder, 'pois_imovel.csv'), pois_imovel_csv);        
+
 
         console.log('uploading files');
         await uploadFiles();
