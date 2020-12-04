@@ -63,6 +63,8 @@ jobs:
       env: 
         VISTA_ENDPOINT: ${{ secrets.VISTA_ENDPOINT }}
         VISTA_KEY: ${{ secrets.VISTA_KEY }}
+        CMS_ENDPOINT: ${{ secrets.CMS_ENDPOINT }}
+        CMS_KEY: ${{ secrets.CMS_KEY }}
       run: |
         yarn install
         yarn build
