@@ -540,7 +540,18 @@ const uploadFiles = () => {
                     }
                 })
                     .then(() => console.log(`${file} uploaded`))
-                    .catch(() => console.error(`${file} not uploaded`));
+                    .catch((error) => {
+                        if (error.response) {
+                            console.error(error.response.data);
+                            console.error(error.response.status);
+                            console.error(error.response.headers);
+                        } else if (error.request) {
+                            console.error(error.request);
+                        } else {
+                            console.error(error.message);
+                        }
+                        console.error(`${file} not uploaded`)
+                    });
             }
         });
 }
