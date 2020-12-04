@@ -550,7 +550,7 @@ const uploadFiles = () => {
                         } else {
                             console.error(error.message);
                         }
-                        console.error(`${file} not uploaded`)
+                        console.error(`${file} not uploaded ${error.message}`)
                     });
             }
         });
