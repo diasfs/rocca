@@ -632,6 +632,13 @@ getImoveis()
         let cidades_csv = Papa.unparse(cidades);
         await fs.promises.writeFile(path.join(data_folder, 'cidades.csv'), cidades_csv);
 
+        console.log('writing condominios.csv');
+        let condominios = imoveis.map(({ NomeCondominio }) => ({ NomeCondominio, slug: slugify(`${NomeCondominio}`, { lower: true, locale: 'pt'}) }));
+        let slugs_condominios = [...new Set(condominios.map(({ slug }) => slug))];
+        condominios = slugs_condominios.filter(slug => slug != '').map(slug => condominios.find(condominio => condominio.slug == slug ));
+        let condominios_csv = Papa.unparse(condominios);
+        await fs.promises.writeFile(path.join(data_folder, 'condominios.csv'), condominios_csv);
+
         console.log('writing categorias.csv');
         let categorias = imoveis.map(({ Categoria }) => ({ Categoria, slug: slugify(`${Categoria}`, { lower: true, locale: 'pt'}) }));
         let slugs_categorias = [...new Set(categorias.map(({ slug }) => slug))];
