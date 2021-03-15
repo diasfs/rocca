@@ -38,8 +38,8 @@ const getPois = () => {
     return data;
 };
 
-//const pois = getPois();
-const pois = []
+const pois = getPois();
+
 
 const getImoveis = async () => {
     let lastCodigo = 0;
