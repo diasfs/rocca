@@ -576,7 +576,7 @@ getImoveis()
         }
         return {
             ...imovel,
-            Empreendimento
+            NomeCondominio
         };
     });
 
