@@ -38,7 +38,8 @@ const getPois = () => {
     return data;
 };
 
-const pois = getPois();
+//const pois = getPois();
+const pois = []
 
 const getImoveis = async () => {
     let lastCodigo = 0;
@@ -415,6 +416,13 @@ const getImoveis = async () => {
         let codigos = rows.map(({ ImoCodigo }) => +ImoCodigo);
         count = codigos.length;
         lastCodigo = Math.max(lastCodigo, ...codigos);
+
+        rows = rows.map(row => {
+            if (row.NomeCondominio == '' && row.Empreendimento != '') {
+                row.NomeCondominio = row.Empreendimento;
+            }
+            return row;
+        })
         Imoveis = [...Imoveis, ...rows];
 
         log(`Loading page ${pagina}`);
@@ -569,16 +577,7 @@ imoveis.listarcampos().then(async campos => {
 getImoveis()
     .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel, Corretores: corretores, CorretoresImovel: corretores_imovel, PoisImovel: pois_imovel}) => {
 
-    imoveis = imoveis.map(imovel => {
-        let NomeCondominio = imovel.NomeCondominio;
-        if ('' == NomeCondominio && imovel.Empreendimento != '') {
-            NomeCondominio = imovel.Empreendimento;
-        }
-        return {
-            ...imovel,
-            NomeCondominio
-        };
-    });
+   
 
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
