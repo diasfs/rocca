@@ -569,6 +569,17 @@ imoveis.listarcampos().then(async campos => {
 getImoveis()
     .then(async ({ Imoveis: imoveis, Fotos: fotos, FotosEmpreendimento: fotos_empreendimento, Anexos: anexos, Videos: videos, CaracteristicasImovel: caracteristicas_imovel, InfraEstruturaImovel: infra_estrutura_imovel, Corretores: corretores, CorretoresImovel: corretores_imovel, PoisImovel: pois_imovel}) => {
 
+    imoveis = imoveis.map(imovel => {
+        let NomeCondominio = imovel.NomeCondominio;
+        if ('' == NomeCondominio && imovel.Empreendimento != '') {
+            NomeCondominio = imovel.Empreendimento;
+        }
+        return {
+            ...imovel,
+            Empreendimento
+        };
+    });
+
     const filename = path.join(data_folder, 'imoveis.json');
     if (!fs.existsSync(data_folder)) {
         await fs.promises.mkdir(data_folder, { recursive: true });
