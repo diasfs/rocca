@@ -670,9 +670,9 @@ getImoveis()
         await fs.promises.writeFile(path.join(data_folder, 'pois_imovel.csv'), pois_imovel_csv);        
 
 
-        console.log('uploading files');
-        await uploadFiles();
-        console.log('files uploaded');
+        //console.log('uploading files');
+        //await uploadFiles();
+        //console.log('files uploaded');
     
 })
 
