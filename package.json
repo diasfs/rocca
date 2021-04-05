@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "parcel src/index.js --target node",
     "watch": "parcel watch src/index.js --target node --bundle-node-modules",
-    "build": "parcel build src/index.js --target node",
+    "build": "parcel build src/index.js src/upload.js --target node",
     "start:dev": "nodemon --ignore ./data ./dist/index.js",
-    "start": "node ./dist/index.js"
+    "start": "node ./dist/index.js",
+    "upload": "node ./dist/upload.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.6",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "axios": "^0.21.0",
+    "concat-stream": "^2.0.0",
     "dotenv": "^8.2.0",
     "form-data": "^3.0.0",
     "node-geo-distance": "^1.2.0",

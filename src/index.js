@@ -56,7 +56,7 @@ const getImoveis = async () => {
     
     let count = 0;
     let pagina = 0;
-    
+    await imoveis.reloadcache();
     do {
         pagina++;
         let rows = await imoveis.listar({
@@ -553,7 +553,7 @@ const uploadFiles = () => {
                             console.error(error.response.data);
                             console.error(error.response.status);
                             console.error(error.response.headers);
-                            //console.log(error.response.config);
+                            console.log(error.response.config);
                         } else if (error.request) {
                             console.error(error.request);
                         } else {

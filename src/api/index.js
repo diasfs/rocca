@@ -15,6 +15,9 @@ export const api = axios.create({
 });
 
 export const imoveis = {
+    reloadcache() {
+        return api.get('/reloadcache').then(({ data }) => data);
+    },
     listarcampos() {
         return api.get('/imoveis/listarcampos').then(({ data }) => data);
     },

@@ -4,3 +4,10 @@ node_modules
 *.log
 data
 dist
+sul.nodes.osm
+sul-latest.osm.pbf
+sul.poi.json
+sul.poi.osm
+vista.http
+osmconvert
+osmosis
