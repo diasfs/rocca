@@ -553,6 +553,7 @@ const uploadFiles = () => {
                             console.error(error.response.data);
                             console.error(error.response.status);
                             console.error(error.response.headers);
+                            console.log(error.response.config);
                         } else if (error.request) {
                             console.error(error.request);
                         } else {
