@@ -61,7 +61,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: "data-folder"
-        path: "data/"
+        path: "sul.poi.json"
   Process-Imoveis:
     name: Processa Imoveis
     runs-on: ubuntu-latest
