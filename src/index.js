@@ -196,6 +196,8 @@ const getImoveis = async () => {
                 "ValorLocacao",
                 "ValorM2",
                 "ValorVenda",
+                "ValorVendaDe",
+                "ValorVendaPor",
                 "Venda",
                 "Visita",
                 "VisitaAcompanhada",
