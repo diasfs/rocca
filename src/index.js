@@ -2,10 +2,16 @@ import { imoveis } from './api';
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
-import slugify from 'slugify';
+//import slugify from 'slugify';
 import FormData from 'form-data';
 import axios from 'axios';
 let geo = require('node-geo-distance');
+
+const Slugify = require('slugify');
+
+const slugify = (txt, opts) => {
+    return Slugify(txt.replace(/\//igm, ' '), opts);
+}
 
 const root_folder = path.dirname(__dirname);
 const data_folder = path.join(root_folder, 'data');
