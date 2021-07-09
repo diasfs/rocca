@@ -420,6 +420,7 @@ const getImoveis = async () => {
                 pagina: 1
             }
         }).catch(({ response }) => console.error(response.data));
+        
         rows = Object.values(rows);
         let codigos = rows.map(({ ImoCodigo }) => +ImoCodigo);
         count = codigos.length;
@@ -436,11 +437,15 @@ const getImoveis = async () => {
         log(`Loading page ${pagina}`);
     } while (count == 50);
 
+    
+    
     count = Imoveis.length;
     pagina = 0;
     for (let imovel of Imoveis) {
         pagina++;
         log(`loading row ${pagina} of ${count}`);
+        
+        
         let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura, Corretor } = await imoveis.detalhes({
             fields: [
                 "Caracteristicas",
@@ -500,7 +505,7 @@ const getImoveis = async () => {
                 },
                 { "Corretor": ["Codigo", "Datacadastro", "RG_Inscricao", "RGEmissor", "CPF_CGC", "Nascimento", "Nacionalidade", "CNH", "CNHExpedicao", "CNHVencimento", "Celular", "Endereco", "Bairro", "Cidade", "UF", "CEP", "Pais", "Fone", "Fax", "Email", "Nome", "Observacoes", "Administrativo", "Agenciador", "Gerente", "Celular1", "Celular2", "Corretor", "Equipe", "Nomecompleto", "Ramal", "Sexo", "Exibirnosite", "Inativo", "CRECI", "Estadocivil", "Diretor", "MetadeCaptacoes", "MetaValordeVendas", "EnderecoTipo", "EnderecoNumero", "EnderecoComplemento", "Bloco", "Chat", "CategoriaRanking", "AtuacaoVenda", "AtuacaoLocacao", "Foto", "Tipo", "CodigoAgencia", "CodigoEquipe"] }
             ],
-            imovel: imovel.Codigo
+            imovel: imovel.ImoCodigo
         });
         /*
         imovel.Foto = Foto;

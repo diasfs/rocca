@@ -51,7 +51,7 @@ export const imoveis = {
         }
 
         return api.get('/imoveis/listar', { params })
-            .then(({ data }) => data);
+            .then(({ data }) => data).then(({ status, message, ...imoveis}) => imoveis);
     },
     detalhes({ fields = [], imovel }) {
         return api.get('/imoveis/detalhes', {
