@@ -14,7 +14,7 @@ import request from 'request';
 //import multiparty from 'multiparty';
 
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+//const __dirname = path.dirname(fileURLToPath(import.meta.url));
 //require('dotenv').config();
 dotenv.config();
 
