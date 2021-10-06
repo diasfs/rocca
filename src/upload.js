@@ -54,7 +54,7 @@ const uploadFiles = () => {
                     gzip: true
                 }, (err, response, body) => {
                     if (err) {
-                        return console.error(`${file} not uploaded ${error.message}`)
+                        return console.error(`${file} not uploaded ${err.message}`)
                     }
                     console.log(`${file} uploaded`);
                 })
