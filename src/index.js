@@ -446,7 +446,7 @@ const getImoveis = async () => {
         log(`loading row ${pagina} of ${count}`);
         
         
-        let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura, Corretor } = await imoveis.detalhes({
+        let resp = await imoveis.detalhes({
             fields: [
                 "Caracteristicas",
                 "InfraEstrutura",
@@ -507,20 +507,38 @@ const getImoveis = async () => {
             ],
             imovel: imovel.ImoCodigo
         });
+
+        let { Foto, FotoEmpreendimento, Video, Anexo, Caracteristicas, InfraEstrutura, Corretor } = resp
+        
         /*
         imovel.Foto = Foto;
         imovel.FotoEmpreendimento = FotoEmpreendimento;
         imovel.Anexo = Anexo;
         imovel.Video = Video;
         */
-        Fotos = [...Fotos, ...Object.values(Foto)];
-        FotosEmpreendimento = [...FotosEmpreendimento, ...Object.values(FotoEmpreendimento)];
-        Anexos = [...Anexos, ...Object.values(Anexo)];
-        Videos = [...Videos, ...Object.values(Video)];
-        CaracteristicasImovel = [...CaracteristicasImovel, {Codigo: imovel.Codigo, ...Caracteristicas}];
-        InfraEstruturaImovel = [...InfraEstruturaImovel, {Codigo: imovel.Codigo, ...InfraEstrutura}];
-        Corretores = [...Corretores, ...Object.values(Corretor)];
-        CorretoresImovel = [...CorretoresImovel, ...Object.values(Corretor).map(({ Codigo }) => ({ CodigoImovel: imovel.Codigo, Codigo }))];
+        if (Foto) {
+            Fotos = [...Fotos, ...Object.values(Foto)];
+        }
+        if (FotosEmpreendimento) {
+            FotosEmpreendimento = [...FotosEmpreendimento, ...Object.values(FotoEmpreendimento)];
+        }
+        if (Anexo) {
+            Anexos = [...Anexos, ...Object.values(Anexo)];
+        }
+        if (Video) {
+            Videos = [...Videos, ...Object.values(Video)];
+        }
+        if (Caracteristicas) {
+            CaracteristicasImovel = [...CaracteristicasImovel, {Codigo: imovel.Codigo, ...Caracteristicas}];
+        }
+        if (InfraEstrutura) {
+            InfraEstruturaImovel = [...InfraEstruturaImovel, {Codigo: imovel.Codigo, ...InfraEstrutura}];
+        }
+        if (Corretor) {
+            Corretores = [...Corretores, ...Object.values(Corretor)];
+            CorretoresImovel = [...CorretoresImovel, ...Object.values(Corretor).map(({ Codigo }) => ({ CodigoImovel: imovel.Codigo, Codigo }))];
+        }
+        
 
         let Pois = pois.map(poi => {
             let { lat, lng } = poi;
