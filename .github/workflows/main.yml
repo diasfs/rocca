@@ -62,7 +62,7 @@ jobs:
         ogr2ogr -f GeoJSON sul.poi.json sul.poi.osm points
         
     - name: Upload data artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: "data-folder"
         path: "sul.poi.json"
